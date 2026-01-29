@@ -73,7 +73,7 @@ const App = () => {
           type='submit'
           className='bg-blue-600 rounded-2xl w-auto h-auto p-4 text-white'
         >
-          Search
+          Search hello its search button
         </button>
       </form>
 
