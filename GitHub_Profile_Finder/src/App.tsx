@@ -1,6 +1,30 @@
 import React, { useState } from 'react'
 import User from './components/UiCard'
 
+// types.ts
+export interface GitHubUser {
+  login: string;
+  id: number;
+  avatar_url: string;
+  html_url: string;
+  name: string | null;
+  company: string | null;
+  blog: string;
+  location: string | null;
+  bio: string | null;
+  public_repos: number;
+  followers: number;
+  following: number;
+  created_at: string;
+}
+
+// This Discriminated Union makes "impossible states impossible"
+export type SearchState = 
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: GitHubUser }
+  | { status: 'error'; message: string };
+
 const App = () => {
 
   const [username, setUsername] = useState('')
@@ -25,7 +49,7 @@ const App = () => {
       }
 
       const data: GitHubUser = await response.json();
-      console.log
+      console.log(data)
 
       setState({ status: 'success', data })
 
@@ -47,7 +71,7 @@ const App = () => {
         />
         <button
           type='submit'
-          className='bg-blue-600'
+          className='bg-blue-600 rounded-2xl w-auto h-auto p-4 text-white'
         >
           Search
         </button>

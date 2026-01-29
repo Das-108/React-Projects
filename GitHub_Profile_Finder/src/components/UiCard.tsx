@@ -1,4 +1,5 @@
 import React from 'react'
+import type { GitHubUser } from '../App'
 
 const UiCard: React.FC<{ user : GitHubUser }> = ({ user }) => {
   return (
@@ -34,7 +35,7 @@ const UiCard: React.FC<{ user : GitHubUser }> = ({ user }) => {
                 <div className='bg-gray-50 p-2 rounded'>
                     <span className='block font-bold'>{user.following}</span>
                     <span className='text-xs text-gray-500 uppercase'>Following</span>
-                </div>
+                </div>                
 
             </div>
         </div>
