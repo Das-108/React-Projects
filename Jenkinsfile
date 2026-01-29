@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        // Defines the Node.js version tool configured in Jenkins
         NODEJS_HOME = tool name: 'node', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
         PATH = "${NODEJS_HOME}/bin:${env.PATH}"
     }
@@ -17,37 +18,31 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Change 'Tic-Tac-Toe' to your actual project folder name
-                dir('Tic-Tac-Toe') { 
-                    echo 'Installing npm packages...'
-                    sh 'npm install'
-                }
+                echo 'Installing npm packages...'
+                sh 'npm install'
             }
         }
 
         stage('Run Tests') {
             steps {
-                dir('Tic-Tac-Toe') {
-                    echo 'Running unit tests...'
-                    sh 'CI=true npm test'
-                }
+                echo 'Running unit tests...'
+                // CI=true prevents the test runner from entering watch mode
+                sh 'CI=true npm test'
             }
         }
 
         stage('Build') {
             steps {
-                dir('Tic-Tac-Toe') {
-                    echo 'Building production bundle...'
-                    sh 'npm run build'
-                }
+                echo 'Building production bundle...'
+                sh 'npm run build'
             }
         }
 
         stage('Archive Artifacts') {
             steps {
-                // Adjust path to include the folder name
                 echo 'Archiving build folder...'
-                archiveArtifacts artifacts: 'Tic-Tac-Toe/build/**', fingerprint: true
+                // This saves the 'build' folder in Jenkins for deployment
+                archiveArtifacts artifacts: 'build/**', fingerprint: true
             }
         }
     }
@@ -57,10 +52,10 @@ pipeline {
             echo 'Pipeline finished execution.'
         }
         success {
-            echo 'Build Successful!'
+            echo 'Build Successful! Your React app is ready for deployment.'
         }
         failure {
-            echo 'Build Failed. Check if the folder name in the Jenkinsfile matches your Git repo.'
+            echo 'Build Failed. Please check the logs.'
         }
     }
 }
