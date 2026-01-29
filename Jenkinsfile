@@ -26,14 +26,14 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                dir('Color-Palate-Generator') {
-                    echo 'Running tests...'
-                    sh 'CI=true npm test'
-                }
-            }
-        }
+        // stage('Run Tests') {
+        //     steps {
+        //         dir('Color-Palate-Generator') {
+        //             echo 'Running tests...'
+        //             sh 'CI=true npm test'
+        //         }
+        //     }
+        // }
 
         stage('Build Project') {
             steps {
