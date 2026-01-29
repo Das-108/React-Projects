@@ -2,15 +2,15 @@ pipeline {
     agent any
 
     environment {
-        // Defines the Node.js version tool configured in Jenkins
+        // This must match the name you gave the tool in 'Manage Jenkins > Tools'
         NODEJS_HOME = tool name: 'node', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
         PATH = "${NODEJS_HOME}/bin:${env.PATH}"
     }
 
     stages {
-        stage('Cleanup') {
+        stage('Cleanup & Checkout') {
             steps {
-                echo 'Cleaning workspace...'
+                echo 'Cleaning workspace and fetching latest code...'
                 deleteDir()
                 checkout scm
             }
@@ -18,44 +18,46 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                echo 'Installing npm packages...'
-                sh 'npm install'
+                // Change 'Color-Palate-Generator' to whichever folder you want to build
+                dir('Color-Palate-Generator') {
+                    echo 'Installing npm packages...'
+                    sh 'npm install'
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo 'Running unit tests...'
-                // CI=true prevents the test runner from entering watch mode
-                sh 'CI=true npm test'
+                dir('Color-Palate-Generator') {
+                    echo 'Running tests...'
+                    sh 'CI=true npm test'
+                }
             }
         }
 
-        stage('Build') {
+        stage('Build Project') {
             steps {
-                echo 'Building production bundle...'
-                sh 'npm run build'
+                dir('Color-Palate-Generator') {
+                    echo 'Creating production build...'
+                    sh 'npm run build'
+                }
             }
         }
 
-        stage('Archive Artifacts') {
+        stage('Archive') {
             steps {
-                echo 'Archiving build folder...'
-                // This saves the 'build' folder in Jenkins for deployment
-                archiveArtifacts artifacts: 'build/**', fingerprint: true
+                echo 'Saving build artifacts...'
+                archiveArtifacts artifacts: 'Color-Palate-Generator/build/**', fingerprint: true
             }
         }
     }
 
     post {
-        always {
-            echo 'Pipeline finished execution.'
-        }
         success {
-            echo 'Build Successful! Your React app is ready for deployment.'
+            echo 'Success! Your React app has been built.'
         }
         failure {
-            echo 'Build Failed. Please check the logs.'
+            echo 'Build Failed. Ensure the folder name in the Jenkinsfile matches the folder in VS Code.'
         }
     }
 }
