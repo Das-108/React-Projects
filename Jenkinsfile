@@ -2,48 +2,57 @@ pipeline {
     agent any
 
     environment {
-        NODEJS_HOME = tool name: 'node', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-        PATH = "${NODEJS_HOME}/bin:${env.PATH}"
+        // Name for your Docker Image and Container
+        IMAGE_NAME = "color-palate-app"
+        CONTAINER_NAME = "color-palate-container"
+        // The port you want to use to access the app on your browser
+        HOST_PORT = "8081" 
     }
 
     stages {
-        stage('Cleanup & Checkout') {
+        stage('Checkout') {
             steps {
+                // Wipe workspace and pull latest code from Git
                 deleteDir()
                 checkout scm
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Docker Build') {
             steps {
-                dir('Color-Palate-Generator') {
-                    echo 'Installing npm packages...'
-                    sh 'npm install'
-                }
+                echo "Building the Docker image..."
+                // Build the image using the Dockerfile in the root directory
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
 
-        stage('Build Project') {
+        stage('Docker Deploy') {
             steps {
-                dir('Color-Palate-Generator') {
-                    echo 'Creating production build with Vite...'
-                    sh 'npm run build'
-                }
-            }
-        }
+                script {
+                    echo "Stopping old containers and starting the new one..."
+                    
+                    // Stop and remove the container if it's already running
+                    // '|| true' ensures the pipeline doesn't crash if the container doesn't exist yet
+                    sh "docker stop ${CONTAINER_NAME} || true"
+                    sh "docker rm ${CONTAINER_NAME} || true"
 
-        stage('Archive') {
-            steps {
-                echo 'Saving build artifacts...'
-                // Corrected path for Vite projects
-                archiveArtifacts artifacts: 'Color-Palate-Generator/dist/**', fingerprint: true
+                    // Start the new container
+                    // Maps Host Port (8081) to Container Port (80)
+                    sh "docker run -d --name ${CONTAINER_NAME} -p ${HOST_PORT}:80 ${IMAGE_NAME}"
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'SUCCESS! You can find your built files in the Artifacts section.'
+            echo "---------------------------------------------------------"
+            echo "SUCCESS: Your changes are now live!"
+            echo "Access your app at http://localhost:${HOST_PORT}"
+            echo "---------------------------------------------------------"
+        }
+        failure {
+            echo "Build or Deployment failed. Please check the logs above."
         }
     }
 }

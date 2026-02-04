@@ -1,26 +1,28 @@
-# Stage 1: Build the React app
+# --- Stage 1: Build Stage ---
 FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package files first (better for caching)
+# Copy package files to leverage Docker layer caching
 COPY package*.json ./
 RUN npm install
 
-# Copy the source code and build the project
+# Copy the rest of the source code
 COPY . .
+
+# Build the project (output usually goes to /app/dist)
 RUN npm run build
 
-# Stage 2: Serve the app with Nginx
+# --- Stage 2: Production Stage ---
 FROM nginx:stable-alpine
 
-# Remove default nginx static assets
+# Clean default static files
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy the 'dist' folder from the build stage to Nginx's serving directory
+# Copy built assets from the 'build' stage
+# Adjust '/app/dist' if your build output folder has a different name
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80 for the web server
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
