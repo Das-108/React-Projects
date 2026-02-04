@@ -22,7 +22,7 @@ const App = () => {
   return (
     <div className='min-h-screen bg-slate-50'>
       <section className='flex flex-col md:flex-row items-center gap-8 p-8 max-w-6xl mx-auto'>
-        <h3 className='text-2xl font-bold text-slate-800'>Palate Gen</h3>
+        <h3 className='text-2xl font-bold text-slate-800'>Bishal Gaihre</h3>
         <form onSubmit={handleSubmit} className='flex gap-0 shadow-sm'>
           <input
            type="text" 
