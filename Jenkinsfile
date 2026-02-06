@@ -1,13 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "gallery-project"
-        CONTAINER_NAME = "gallery-project-container"
-        HOST_PORT = "8081" 
-        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -16,30 +9,23 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Compose Deploy') {
             steps {
-                echo "Building image: ${IMAGE_NAME}"
-                sh "docker build -t ${IMAGE_NAME} ."
-            }
-        }
-
-        stage('Docker Deploy') {
-            steps {
-                script {
-                    sh "docker stop ${CONTAINER_NAME} || true"
-                    sh "docker rm ${CONTAINER_NAME} || true"
-                    sh "docker run -d --name ${CONTAINER_NAME} -p ${HOST_PORT}:80 ${IMAGE_NAME}"
-                }
+                echo "Building and starting services..."
+                // --build: Forces a rebuild of the image using your Dockerfile
+                // -d: Runs in the background (detached mode)
+                sh "docker-compose up --build -d"
             }
         }
     }
 
     post {
         success {
-            echo "Successfully deployed at http://localhost:${HOST_PORT}"
+            echo "Application is live!"
         }
-        failure {
-            echo "Pipeline failed. Check the Docker logs or Jenkins console output."
+        always {
+            // Clean up dangling images to save space on your Jenkins node
+            sh "docker image prune -f"
         }
     }
 }

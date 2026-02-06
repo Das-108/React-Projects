@@ -1,0 +1,9 @@
+services:
+  gallery-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gallery-project-container
+    ports:
+      - "8081:80"
+    restart: always
