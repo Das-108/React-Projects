@@ -4,8 +4,8 @@ pipeline {
     environment {
         // Fix for 'docker: command not found' on macOS
         PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/docker"
-        IMAGE_NAME = "color-palate-app"
-        CONTAINER_NAME = "color-palate-container"
+        IMAGE_NAME = "Gallery-Project"
+        CONTAINER_NAME = "Gallery-Project-container"
         HOST_PORT = "8081" 
     }
 

@@ -3,11 +3,11 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 # Copy package files from the subfolder
-COPY Color-Palate-Generator/package*.json ./
+COPY Gallery-Project/package*.json ./
 RUN npm install
 
 # Copy the entire subfolder content
-COPY Color-Palate-Generator/ .
+COPY Gallery-Project/ .
 RUN npm run build
 
 # --- Stage 2: Serve ---
