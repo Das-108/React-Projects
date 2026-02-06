@@ -1,45 +1,21 @@
-pipeline {
-    agent any
+# --- Stage 1: Build ---
+FROM node:20-alpine AS build
+WORKDIR /app
 
-    environment {
-        // Updated to lowercase to satisfy Docker naming conventions
-        IMAGE_NAME = "gallery-project" 
-        CONTAINER_NAME = "gallery-project-container"
-        HOST_PORT = "8081" 
-        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    }
+# Copy package files from the subfolder
+COPY Gallery-Project/package*.json ./
+RUN npm install
 
-    stages {
-        stage('Checkout') {
-            steps {
-                deleteDir()
-                checkout scm
-            }
-        }
+# Copy the entire subfolder content
+COPY Gallery-Project/ .
+RUN npm run build
 
-        stage('Docker Build') {
-            steps {
-                echo "Building image: ${IMAGE_NAME}"
-                // The '.' indicates the root context where the Dockerfile lives
-                sh "docker build -t ${IMAGE_NAME} ."
-            }
-        }
+# --- Stage 2: Serve ---
+FROM nginx:stable-alpine
+RUN rm -rf /usr/share/nginx/html/*
 
-        stage('Docker Deploy') {
-            steps {
-                script {
-                    // Stop and remove old containers to avoid naming conflicts
-                    sh "docker stop ${CONTAINER_NAME} || true"
-                    sh "docker rm ${CONTAINER_NAME} || true"
-                    sh "docker run -d --name ${CONTAINER_NAME} -p ${HOST_PORT}:80 ${IMAGE_NAME}"
-                }
-            }
-        }
-    }
+# Copy build output to nginx (Vite usually outputs to 'dist')
+COPY --from=build /app/dist /usr/share/nginx/html
 
-    post {
-        success {
-            echo "Successfully deployed at http://localhost:${HOST_PORT}"
-        }
-    }
-}
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
